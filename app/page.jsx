@@ -40,7 +40,7 @@ export default function Home() {
     }
   }
 
-  // ===== Prompt Background + Relight (Clipdrop) =====
+  // ===== Prompt Background + Relight (Clipdrop replace-background) =====
   const [pbOutUrl, setPbOutUrl] = useState(null);
   const [pbLoading, setPbLoading] = useState(false);
   const [pbErr, setPbErr] = useState("");
@@ -64,8 +64,8 @@ export default function Home() {
     setPbLoading(true);
     try {
       const fd = new FormData();
-      fd.append("image", file);      // IMPORTANT: field name is 'image'
-      fd.append("prompt", prompt);   // and 'prompt' to match the API route
+      fd.append("image", file);      // must be 'image' to match API route
+      fd.append("prompt", prompt);
 
       const res = await fetch("/api/relight", { method: "POST", body: fd });
       if (!res.ok) {
@@ -79,6 +79,55 @@ export default function Home() {
       setPbErr("Network error. Please try again.");
     } finally {
       setPbLoading(false);
+    }
+  }
+
+  // ===== Upscale (2×/4×) using target_width/target_height =====
+  const [upsUrl, setUpsUrl] = useState(null);
+  const [upsLoading, setUpsLoading] = useState(false);
+  const [upsErr, setUpsErr] = useState("");
+
+  async function handleUpscale(e) {
+    e.preventDefault();
+    setUpsErr(""); setUpsUrl(null);
+    const file = e.target.image.files?.[0];
+    const factor = parseInt(e.target.scale.value || "2", 10);
+    if (!file) { setUpsErr("Pick an image."); return; }
+    if (file.size > 8 * 1024 * 1024) { setUpsErr("Max 8 MB."); return; }
+
+    setUpsLoading(true);
+    try {
+      // Determine original dimensions in the browser
+      const blobUrl = URL.createObjectURL(file);
+      const img = new Image();
+      const dims = await new Promise((resolve, reject) => {
+        img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+        img.onerror = reject;
+        img.src = blobUrl;
+      });
+      URL.revokeObjectURL(blobUrl);
+
+      // Compute targets (cap at 4096 per provider limits)
+      const targetWidth = Math.min(dims.w * factor, 4096);
+      const targetHeight = Math.min(dims.h * factor, 4096);
+
+      const fd = new FormData();
+      fd.append("image", file);
+      fd.append("target_width", String(targetWidth));
+      fd.append("target_height", String(targetHeight));
+
+      const res = await fetch("/api/upscale", { method: "POST", body: fd });
+      if (!res.ok) {
+        const txt = await res.text();
+        setUpsErr(txt || "Upscale failed.");
+        return;
+      }
+      const blob = await res.blob();
+      setUpsUrl(URL.createObjectURL(blob));
+    } catch {
+      setUpsErr("Network error. Please try again.");
+    } finally {
+      setUpsLoading(false);
     }
   }
 
@@ -96,6 +145,7 @@ export default function Home() {
             <a className="px-3 py-2 rounded hover:bg-gray-100" href="#how">How it works</a>
             <a className="px-3 py-2 rounded hover:bg-gray-100" href="#cta">Remove BG</a>
             <a className="px-3 py-2 rounded hover:bg-gray-100" href="#prompt-bg">Prompt BG</a>
+            <a className="px-3 py-2 rounded hover:bg-gray-100" href="#upscale">Upscale</a>
           </nav>
         </div>
       </header>
@@ -233,6 +283,42 @@ export default function Home() {
               <img alt="Composite result" src={pbOutUrl} className="max-h-96 mx-auto" />
               <div className="mt-3">
                 <a href={pbOutUrl} download="synir-composite.png" className="text-sm underline">Download PNG</a>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Upscale */}
+      <section id="upscale" className="border-t bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 className="text-xl font-semibold">Upscale (2×/4×)</h3>
+            <p className="mt-2 text-gray-600">Sharpen and enlarge photos while keeping quality.</p>
+          </div>
+
+          <form onSubmit={handleUpscale} className="bg-gray-50 border rounded-2xl p-4 grid gap-3">
+            <input name="image" type="file" accept="image/*" className="border rounded-xl px-4 py-3" />
+            <select name="scale" className="border rounded-xl px-4 py-3">
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+            </select>
+            <button
+              disabled={upsLoading}
+              className="rounded-xl bg-indigo-600 text-white px-5 py-3 font-medium hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {upsLoading ? "Upscaling…" : "Upscale"}
+            </button>
+            {upsErr && <p className="text-sm text-red-600">{upsErr}</p>}
+          </form>
+        </div>
+
+        {upsUrl && (
+          <div className="max-w-6xl mx-auto px-6 pb-14">
+            <div className="border rounded-2xl p-4 bg-white">
+              <img alt="Upscaled result" src={upsUrl} className="max-h-96 mx-auto" />
+              <div className="mt-3">
+                <a href={upsUrl} download="synir-upscaled.png" className="text-sm underline">Download PNG</a>
               </div>
             </div>
           </div>
