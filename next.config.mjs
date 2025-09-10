@@ -18,7 +18,7 @@ const nextConfig = {
               "img-src 'self' blob: data:",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
               "style-src 'self' 'unsafe-inline'",
-              "connect-src 'self' https://api.clipdrop.co https://clipdrop-api.co https://api.resend.com https://api.stripe.com https://api.openai.com",
+              "connect-src 'self' https://api.clipdrop.co https://clipdrop-api.co https://api.resend.com https://api.stripe.com https://api.openai.com https://api.xendit.co",
               "frame-src https://challenges.cloudflare.com https://checkout.stripe.com",
               "frame-ancestors 'self'",
             ].join("; "),

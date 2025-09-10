@@ -15,7 +15,7 @@ export async function POST(req) {
       if (session?.user?.id) {
         uid = session.user.id;
         const sub = await prisma.subscription.findUnique({ where: { userId: uid } });
-        isPro = Boolean(sub && (sub.status === "active" || sub.status === "trialing"));
+        if (sub) isPro = Boolean(sub && (sub.status === "active" || sub.status === "trialing"));
       }
     } catch {}
     const { limit, quotaKey } = await import("../../../lib/ratelimit.js");

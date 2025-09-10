@@ -11,43 +11,34 @@ export async function POST(req) {
 
     const body = await req.json().catch(() => ({}));
     const plan = body.plan || "monthly"; // 'monthly' | 'annual'
-    const price = plan === "annual" ? process.env.STRIPE_PRICE_ANNUAL : process.env.STRIPE_PRICE_MONTHLY;
-    const secret = process.env.STRIPE_SECRET_KEY;
-    if (!secret || !price) return new Response("Stripe not configured", { status: 500 });
 
-    // Ensure user has stripeCustomerId
-    let user = await prisma.user.findUnique({ where: { id: session.user.id } });
-    let stripeCustomerId = user?.stripeCustomerId || null;
-    if (!stripeCustomerId) {
-      // Create a new Stripe customer via API
-      const cp = new URLSearchParams();
-      if (user?.email) cp.append("email", user.email);
-      if (user?.name) cp.append("name", user.name);
-      const c = await fetch("https://api.stripe.com/v1/customers", { method: "POST", headers: { Authorization: `Bearer ${secret}` }, body: cp });
-      const cj = await c.json();
-      if (!c.ok) return new Response(cj?.error?.message || "Stripe customer error", { status: 502 });
-      stripeCustomerId = cj.id;
-      await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId } });
-    }
+    const xenditKey = process.env.XENDIT_SECRET_KEY;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    if (!xenditKey) return new Response("Xendit not configured", { status: 500 });
 
-    // Create Checkout Session via Stripe REST API
-    const params = new URLSearchParams();
-    params.append("mode", "subscription");
-    params.append("success_url", `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/account`);
-    params.append("cancel_url", `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/pricing`);
-    params.append("line_items[0][price]", price);
-    params.append("line_items[0][quantity]", "1");
-    params.append("customer", stripeCustomerId);
-    params.append("client_reference_id", session.user.id);
+    // Simple pricing via env amounts (in PHP). Example: 299 for monthly, 2499 for annual.
+    const amount = plan === "annual" ? Number(process.env.XENDIT_PRICE_ANNUAL || 2499) : Number(process.env.XENDIT_PRICE_MONTHLY || 299);
+    if (!amount || amount < 1) return new Response("Invalid Xendit amount", { status: 500 });
 
-    const r = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+    const externalId = `sub_${plan}_${session.user.id}_${Date.now()}`;
+    const payload = {
+      external_id: externalId,
+      amount,
+      currency: "PHP",
+      description: `Synir Pro (${plan})`,
+      success_redirect_url: `${siteUrl}/account`,
+      failure_redirect_url: `${siteUrl}/pricing`,
+    };
+
+    const xr = await fetch("https://api.xendit.co/v2/invoices", {
       method: "POST",
-      headers: { Authorization: `Bearer ${secret}` },
-      body: params,
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${Buffer.from(xenditKey + ":").toString("base64")}` },
+      body: JSON.stringify(payload),
     });
-    const data = await r.json();
-    if (!r.ok) return new Response(data?.error?.message || "Stripe error", { status: 502 });
-    return Response.json({ id: data.id, url: data.url });
+    const xj = await xr.json().catch(()=>({}));
+    if (!xr.ok) return new Response(xj?.message || "Xendit error", { status: 502 });
+
+    return Response.json({ id: xj.id, url: xj.invoice_url });
   } catch (e) {
     return new Response(`Server error: ${e.message}`, { status: 500 });
   }

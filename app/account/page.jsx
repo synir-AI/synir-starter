@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import InfoNote from "../components/InfoNote.jsx";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
@@ -47,10 +48,13 @@ export default function AccountPage() {
               <div className="text-sm text-[#2F3E46]/60">Stripe customer</div>
               <div className="font-mono break-all">{customer || "–"}</div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button onClick={manageBilling} disabled={!customer} className="rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] disabled:opacity-50">Open billing portal</button>
+              <button onClick={async ()=>{ await fetch('/api/demo/pro?on=1', { method:'POST' }); window.location.reload(); }} className="rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Enable Pro (demo)</button>
+              <button onClick={async ()=>{ await fetch('/api/demo/pro?on=0', { method:'POST' }); window.location.reload(); }} className="rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Disable Pro (demo)</button>
               <a href="/tools" className="rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Go to tools</a>
             </div>
+            <InfoNote>Demo Pro sets a temporary cookie for this browser only. Subscriptions stay in sync via webhooks when you add a payment provider.</InfoNote>
             {err && <p className="text-sm text-red-600">{err}</p>}
           </div>
         )}

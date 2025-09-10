@@ -106,3 +106,8 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
 - Set: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
 - API routes under `/api/clipdrop/*` apply daily quotas: Free vs Pro.
 - Without Upstash env, routes still work; limiter is skipped.
+
+### Xendit + Google Auth (PH-friendly)
+
+- Xendit: set `XENDIT_SECRET_KEY`, `XENDIT_PRICE_MONTHLY`, `XENDIT_PRICE_ANNUAL`, optionally `XENDIT_CALLBACK_TOKEN`. Webhook URL: `/api/xendit/webhook`.
+- Google login: set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and keep `NEXTAUTH_*`.
