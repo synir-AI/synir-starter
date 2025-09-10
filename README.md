@@ -48,3 +48,17 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
 - The Extend tool uses Clipdrop Uncrop and intentionally sends a minimal payload for broad key compatibility.
 - You can deploy to Vercel and add `CLIPDROP_API_KEY` in the Vercel Project -> Settings -> Environment Variables.
 
+## Deploy
+
+### Vercel
+
+1) Push to GitHub (done) and import the repo in Vercel.
+2) In Vercel, set Environment Variables (Project -> Settings -> Environment Variables):
+   - `CLIPDROP_API_KEY` = your key (Required)
+   - Optional keys (only if you wire up those providers): `REMOVE_BG_API_KEY`, `OPENAI_API_KEY`, `SLAZZER_API_KEY`, `CUTOUTPRO_API_KEY`, `REPLICATE_API_TOKEN`.
+3) Deploy.
+
+### Local .env
+
+- Copy `.env.local.example` to `.env.local` and fill values.
+- Restart `npm run dev` after changes.
