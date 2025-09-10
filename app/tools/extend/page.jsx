@@ -28,9 +28,23 @@ export default function ExtendPage() {
     setErr("");
     setResult("");
     try {
-      // Note: Many Clipdrop Uncrop keys only accept image_file; keep payload minimal
+      // Determine target size if none provided
+      let tw = parseInt(w || "0", 10);
+      let th = parseInt(h || "0", 10);
+      if (!tw || !th) {
+        const imgUrl = URL.createObjectURL(file);
+        const imgEl = new Image();
+        await new Promise((resolve, reject) => { imgEl.onload = resolve; imgEl.onerror = reject; imgEl.src = imgUrl; });
+        const origW = imgEl.naturalWidth; const origH = imgEl.naturalHeight;
+        tw = Math.max(origW, 2048); th = Math.max(origH, 2048);
+      }
+
       const fd = new FormData();
       fd.append("image_file", file);
+      if (prompt.trim()) fd.append("prompt", prompt.trim());
+      fd.append("target_width", String(tw));
+      fd.append("target_height", String(th));
+
       const res = await fetch("/api/clipdrop/extend", { method: "POST", body: fd });
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
@@ -96,4 +110,3 @@ export default function ExtendPage() {
     </main>
   );
 }
-

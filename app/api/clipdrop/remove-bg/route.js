@@ -32,17 +32,21 @@ export async function POST(req) {
     const file = fd.get("image_file");
     if (!file) return new Response("No image_file provided", { status: 400 });
 
-    const upstream = new FormData();
-    upstream.append("image_file", file);
+    const upstream = new FormData(); upstream.append("image_file", file);
 
-    const r = await fetch("https://api.clipdrop.co/remove-background/v1", {
-      method: "POST",
-      headers: { "x-api-key": apiKey },
-      body: upstream,
-    });
-    if (!r.ok) return new Response(`Clipdrop error: ${await r.text()}`, { status: 502 });
+    async function tryHosts(path) {
+      const hosts = ["https://clipdrop-api.co", "https://api.clipdrop.co"];
+      let last = "";
+      for (const host of hosts) {
+        const r = await fetch(host + path, { method: "POST", headers: { "x-api-key": apiKey }, body: upstream, cache: "no-store" });
+        if (r.ok) return new Response(await r.blob(), { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } });
+        try { last = await r.text(); } catch { last = ""; }
+        if (r.status !== 404 && !/Unknown url/i.test(last)) return new Response(`Clipdrop error (${r.status}): ${last}`, { status: 502 });
+      }
+      return new Response(`Clipdrop error: ${last || "Unknown url"}`, { status: 502 });
+    }
 
-    return new Response(await r.blob(), { headers: { "Content-Type": "image/png", "Cache-Control": "no-store" } });
+    return await tryHosts("/remove-background/v1");
   } catch (err) {
     return new Response(`Server error: ${err.message}`, { status: 500 });
   }

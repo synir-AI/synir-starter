@@ -32,7 +32,9 @@ export async function POST(req) {
     // ✅ Use the correct host for generation
     const endpoints = [
       "https://clipdrop-api.co/text-to-image/v1",
-      "https://clipdrop-api.co/text-to-image", // fallback
+      "https://clipdrop-api.co/text-to-image",
+      "https://api.clipdrop.co/text-to-image/v1",
+      "https://api.clipdrop.co/text-to-image",
     ];
 
     let lastText = "";

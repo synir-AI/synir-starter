@@ -62,10 +62,15 @@ export async function POST(req) {
     const file = fd.get("image_file");
     if (!file) return new Response("No image_file provided", { status: 400 });
 
-    // IMPORTANT: Many plans/keys reject extra fields for Uncrop.
-    // Send only the image to avoid "Unrecognized key(s)".
     const upstream = new FormData();
     upstream.append("image_file", file);
+    // Optional params when provided by client
+    const targetW = fd.get("target_width");
+    const targetH = fd.get("target_height");
+    const prompt = fd.get("prompt");
+    if (targetW) upstream.append("target_width", targetW);
+    if (targetH) upstream.append("target_height", targetH);
+    if (prompt) upstream.append("prompt", prompt);
 
     return await tryHosts("/uncrop/v1", upstream, apiKey);
   } catch (e) {
