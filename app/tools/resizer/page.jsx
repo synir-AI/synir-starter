@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import InfoNote from "../../components/InfoNote.jsx";
+import InfoNote from "../../../components/InfoNote.jsx";
 
 export default function ResizerPage() {
   const inputRef = useRef(null);
