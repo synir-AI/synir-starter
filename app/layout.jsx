@@ -1,9 +1,8 @@
-
-import '../styles/globals.css';
+import "../styles/globals.css";
 
 export const metadata = {
-  title: 'Synir — AI Image Tools',
-  description: 'Background removal, upscaling, generation, and outpainting — fast and simple.',
+  title: "Synir AI — Intelligence at the Core",
+  description: "AI-powered creative and workflow tools by Synir AI."
 };
 
 export default function RootLayout({ children }) {
