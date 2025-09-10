@@ -9,9 +9,9 @@ export default function PricingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { name: "Free", price: "$0", features: ["Basic tools", "Watermark", "Rate limits"] },
-            { name: "Pro", price: "$12/mo", features: ["HD exports", "Priority queue", "No watermark"] },
-            { name: "Team", price: "$49/mo", features: ["Seats", "Share presets", "Usage dashboard"] },
+            { name: "Free", price: "$0", features: ["Basic tools", "Watermark", "Daily limits"] },
+            { name: "Pro (Monthly)", price: "$12/mo", plan: "monthly", features: ["HD exports", "Priority queue", "No watermark"] },
+            { name: "Pro (Annual)", price: "$99/yr", plan: "annual", features: ["2 months free", "HD exports", "No watermark"] },
           ].map((p) => (
             <div key={p.name} className="rounded-2xl bg-white border border-[#E6E6E6] p-6 shadow-sm">
               <h3 className="text-lg font-semibold">{p.name}</h3>
@@ -19,7 +19,19 @@ export default function PricingPage() {
               <ul className="mt-4 space-y-2 text-sm text-[#2F3E46]/80">
                 {p.features.map((f) => (<li key={f}>• {f}</li>))}
               </ul>
-              <a href="/signup" className="mt-6 inline-block rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] hover:opacity-90">Choose {p.name}</a>
+              {p.plan ? (
+                <form className="mt-6" onSubmit={async (e) => {
+                  e.preventDefault();
+                  const res = await fetch('/api/billing/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: p.plan }) });
+                  if (!res.ok) { alert(await res.text()); return; }
+                  const j = await res.json();
+                  window.location.href = j.url;
+                }}>
+                  <button className="w-full rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] hover:opacity-90">Choose {p.name}</button>
+                </form>
+              ) : (
+                <a href="/tools" className="mt-6 inline-block rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Get started</a>
+              )}
             </div>
           ))}
         </div>
@@ -31,4 +43,3 @@ export default function PricingPage() {
     </main>
   );
 }
-

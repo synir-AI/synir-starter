@@ -49,6 +49,13 @@ export default function ContactPage() {
             <span>Website</span>
             <input tabIndex={-1} autoComplete="off" value={website} onChange={(e)=>setWebsite(e.target.value)} />
           </label>
+          {/* Turnstile widget (optional) */}
+          {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+            <div className="mt-2">
+              <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+              <div className="cf-turnstile" data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}></div>
+            </div>
+          )}
           <label className="block">
             <span className="text-sm font-medium">Name</span>
             <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" value={name} onChange={(e)=>setName(e.target.value)} />

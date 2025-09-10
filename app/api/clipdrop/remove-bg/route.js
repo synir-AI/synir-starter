@@ -2,6 +2,17 @@ export const runtime = "nodejs";
 
 export async function POST(req) {
   try {
+    // Basic quota limiting (free vs. pro via cookie)
+    const cookies = req.headers.get("cookie") || "";
+    const isPro = /(?:^|; )pro=1(?:;|$)/.test(cookies);
+    const uid = (cookies.match(/(?:^|; )uid=([^;]+)/)?.[1]) || "anon";
+    const { limit, quotaKey } = await import("../../../lib/ratelimit.js");
+    const key = (await quotaKey({ tool: "remove-bg", uid })).toString();
+    const max = isPro ? 200 : 10;
+    const win = 60 * 60 * 24; // 1 day
+    const resLimit = await limit(key, { max, windowSec: win });
+    if (!resLimit.allowed) return new Response("Quota exceeded", { status: 429 });
+
     const apiKey = process.env.CLIPDROP_API_KEY;
     if (!apiKey) return new Response("Missing CLIPDROP_API_KEY", { status: 500 });
 

@@ -60,6 +60,19 @@ export async function POST(req) {
     if (!validEmail(emailT)) return new Response("Invalid email", { status: 400 });
     if (nameT.length > 200 || msgT.length > 4000) return new Response("Payload too large", { status: 413 });
 
+    // Turnstile verify (optional)
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    const token = req.headers.get("cf-turnstile-response") || body["cf-turnstile-response"] || "";
+    if (turnstileSecret) {
+      const form = new URLSearchParams();
+      form.append("secret", turnstileSecret);
+      form.append("response", token);
+      if (ip) form.append("remoteip", ip);
+      const tv = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+      const tvj = await tv.json().catch(() => ({}));
+      if (!tvj.success) return new Response("Captcha failed", { status: 400 });
+    }
+
     const to = process.env.CONTACT_TO || "owner@example.com"; // set CONTACT_TO in env
     const from = process.env.CONTACT_FROM || "noreply@synir.ai";
 

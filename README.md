@@ -26,6 +26,7 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
   - `CONTACT_TO`: recipient email address (e.g., you@domain.com)
   - `CONTACT_FROM`: sender address (e.g., noreply@yourdomain.com)
   - `ALLOWED_ORIGIN`: optional strict origin (e.g., https://yourdomain.com)
+  - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`: optional Cloudflare Turnstile spam protection
 - Optional providers (not required by default UI):
   - `REMOVE_BG_API_KEY`
   - `OPENAI_API_KEY`
@@ -75,3 +76,15 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
 - Honeypot + origin checks: contact API requires `X-Requested-With` and enforces origin/host match or `ALLOWED_ORIGIN`.
 - Security headers: set in `next.config.mjs` (CSP, X-Frame-Options, etc.). Adjust CSP if you add external scripts.
 - Health check: `/api/health` returns `{ ok: true }` for monitoring.
+### Subscriptions (Stripe)
+
+- Set: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `NEXT_PUBLIC_SITE_URL`.
+- Optional: `STRIPE_WEBHOOK_SECRET` (recommended). Point a Stripe webhook to `/api/stripe/webhook`.
+- UI buttons on `/pricing` call `/api/billing/checkout` to create sessions. After success, `/account` marks this browser as "pro" (temporary until auth is added) and shows a link to open the Billing Portal.
+- For production: add real authentication (e.g., Auth.js/Clerk) and persist customer/subscription state in your DB.
+
+### Rate Limiting (Upstash)
+
+- Set: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`.
+- API routes under `/api/clipdrop/*` apply daily quotas: Free vs Pro.
+- Without Upstash env, routes still work; limiter is skipped.
