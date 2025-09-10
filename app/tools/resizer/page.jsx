@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import InfoNote from "../../components/InfoNote.jsx";
 
 export default function ResizerPage() {
   const inputRef = useRef(null);
@@ -9,6 +10,7 @@ export default function ResizerPage() {
   const [w, setW] = useState("");
   const [h, setH] = useState("");
   const [mode, setMode] = useState("auto"); // auto | upscale | outpaint
+  const [usedMode, setUsedMode] = useState(""); // downscale | upscale | outpaint
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -19,7 +21,7 @@ export default function ResizerPage() {
     if (!file) return setErr("Choose an image first.");
     const tw = parseInt(w||"0",10); const th = parseInt(h||"0",10);
     if (!tw || !th) return setErr("Enter target width and height.");
-    setLoading(true); setErr(""); setResult("");
+    setLoading(true); setErr(""); setResult(""); setUsedMode("");
     try {
       // Load original to compare sizes
       const imgUrl = URL.createObjectURL(file); const base = new Image();
@@ -32,7 +34,7 @@ export default function ResizerPage() {
         const ctx = c.getContext("2d");
         ctx.drawImage(base, 0,0, origW,origH, 0,0, tw,th);
         const blob = await new Promise(res=>c.toBlob(res, "image/png"));
-        setResult(URL.createObjectURL(blob));
+        setResult(URL.createObjectURL(blob)); setUsedMode("downscale");
         return;
       }
 
@@ -50,7 +52,7 @@ export default function ResizerPage() {
         const dw = Math.round(up.naturalWidth*scale), dh = Math.round(up.naturalHeight*scale);
         const dx = Math.floor((tw-dw)/2), dy = Math.floor((th-dh)/2);
         ctx.drawImage(up, dx,dy, dw,dh);
-        const blob = await new Promise(res=>c.toBlob(res, "image/png")); setResult(URL.createObjectURL(blob));
+        const blob = await new Promise(res=>c.toBlob(res, "image/png")); setResult(URL.createObjectURL(blob)); setUsedMode("upscale");
         return;
       }
 
@@ -63,7 +65,7 @@ export default function ResizerPage() {
       const fd2 = new FormData(); fd2.append("image_file", file); fd2.append("mask_file", maskBlob, "mask.png"); fd2.append("target_width", String(tw)); fd2.append("target_height", String(th));
       const r2 = await fetch("/api/openai/outpaint", { method: "POST", body: fd2 });
       if (!r2.ok) throw new Error(await r2.text());
-      const blob2 = await r2.blob(); setResult(URL.createObjectURL(blob2));
+      const blob2 = await r2.blob(); setResult(URL.createObjectURL(blob2)); setUsedMode("outpaint");
     } catch (e) { setErr(e.message || "Something went wrong."); }
     finally { setLoading(false); }
   };
@@ -103,6 +105,9 @@ export default function ResizerPage() {
                 {result ? <img className="object-contain max-h-full" src={result} alt="Result" /> : <span className="text-[#2F3E46]/60 text-sm">Result will appear here</span>}
               </div>
               {result && <a href={result} download="resized.png" className="mt-4 inline-block rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Download</a>}
+              {usedMode === "downscale" && <InfoNote>Downscaled locally for free.</InfoNote>}
+              {usedMode === "upscale" && <InfoNote>Upscaled with Clipdrop, then letterboxed to exact size.</InfoNote>}
+              {usedMode === "outpaint" && <InfoNote>Outpainted with OpenAI to achieve exact WxH.</InfoNote>}
             </div>
           </div>
         </section>
@@ -110,4 +115,3 @@ export default function ResizerPage() {
     </main>
   );
 }
-

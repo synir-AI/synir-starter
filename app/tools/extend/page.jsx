@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import InfoNote from "../../components/InfoNote.jsx";
 
 export default function ExtendPage() {
   const inputRef = useRef(null);
@@ -180,7 +181,7 @@ export default function ExtendPage() {
                 {result ? (<img className="object-contain max-h-full" src={result} alt="Result" />) : (<span className="text-[#2F3E46]/60 text-sm">Result will appear here</span>)}
               </div>
               {result && (<a href={result} download="extended.png" className="mt-4 inline-block rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Download</a>)}
-              {usedFallback && <p className="mt-2 text-xs text-[#2F3E46]/60">Used AI fallback to achieve exact size.</p>}
+              {usedFallback && <InfoNote>Used AI fallback (OpenAI) to achieve exact size.</InfoNote>}
             </div>
           </div>
         </section>
@@ -188,4 +189,3 @@ export default function ExtendPage() {
     </main>
   );
 }
-
