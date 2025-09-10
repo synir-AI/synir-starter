@@ -9,6 +9,18 @@ export default function ExtendPage() {
   const [prompt, setPrompt] = useState("");
   const [w, setW] = useState("");
   const [h, setH] = useState("");
+  const MAX_DIM = 4096;
+
+  const presets = [
+    { label: "Square 1:1 (1024 x 1024)", w: 1024, h: 1024 },
+    { label: "Instagram Portrait (1080 x 1350)", w: 1080, h: 1350 },
+    { label: "Instagram Landscape (1080 x 566)", w: 1080, h: 566 },
+    { label: "YouTube Thumbnail (1280 x 720)", w: 1280, h: 720 },
+    { label: "Full HD (1920 x 1080)", w: 1920, h: 1080 },
+    { label: "2K (2048 x 1152)", w: 2048, h: 1152 },
+    { label: "Square 2048 (2048 x 2048)", w: 2048, h: 2048 },
+    { label: "4K UHD (3840 x 2160)", w: 3840, h: 2160 },
+  ];
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -28,7 +40,7 @@ export default function ExtendPage() {
     setErr("");
     setResult("");
     try {
-      // Determine target size if none provided
+      // Determine target size if none provided; clamp to MAX_DIM
       let tw = parseInt(w || "0", 10);
       let th = parseInt(h || "0", 10);
       if (!tw || !th) {
@@ -38,6 +50,8 @@ export default function ExtendPage() {
         const origW = imgEl.naturalWidth; const origH = imgEl.naturalHeight;
         tw = Math.max(origW, 2048); th = Math.max(origH, 2048);
       }
+      tw = Math.min(Math.max(1, tw), MAX_DIM);
+      th = Math.min(Math.max(1, th), MAX_DIM);
 
       const fd = new FormData();
       fd.append("image_file", file);
@@ -74,12 +88,21 @@ export default function ExtendPage() {
                 )}
                 <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onChange} />
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-1 gap-3">
+                <label className="block">
+                  <span className="text-sm font-medium">Common sizes</span>
+                  <select className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" defaultValue="" onChange={(e)=>{ const i = Number(e.target.value); if (!Number.isNaN(i) && presets[i]) { setW(String(presets[i].w)); setH(String(presets[i].h)); } }}>
+                    <option value="" disabled>Select a preset…</option>
+                    {presets.map((p, i) => (<option key={p.label} value={i}>{p.label}</option>))}
+                  </select>
+                </label>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3">
                 <label className="block"><span className="text-sm font-medium">Target width (px)</span>
-                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={w} onChange={(e) => setW(e.target.value)} />
+                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={w} onChange={(e) => setW(e.target.value.replace(/[^0-9]/g, ""))} />
                 </label>
                 <label className="block"><span className="text-sm font-medium">Target height (px)</span>
-                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={h} onChange={(e) => setH(e.target.value)} />
+                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={h} onChange={(e) => setH(e.target.value.replace(/[^0-9]/g, ""))} />
                 </label>
               </div>
               <label className="mt-4 block">
@@ -90,6 +113,7 @@ export default function ExtendPage() {
                 <button onClick={run} disabled={!file || loading} className="rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] disabled:opacity-50">{loading ? "Processing..." : "Extend"}</button>
                 <a href="/tools" className="rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Back to tools</a>
               </div>
+              <p className="mt-2 text-xs text-[#2F3E46]/60">Max dimension is {MAX_DIM}px. If your Clipdrop plan doesn’t support target sizes, we’ll automatically fall back to extending without changing dimensions.</p>
               {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
             </div>
             <div>
