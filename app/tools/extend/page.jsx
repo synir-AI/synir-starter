@@ -23,6 +23,7 @@ export default function ExtendPage() {
   ];
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [forceExact, setForceExact] = useState(false);
 
   const pick = () => inputRef.current?.click();
   const onChange = (e) => {
@@ -59,10 +60,39 @@ export default function ExtendPage() {
       fd.append("target_width", String(tw));
       fd.append("target_height", String(th));
 
-      const res = await fetch("/api/clipdrop/extend", { method: "POST", body: fd });
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      setResult(URL.createObjectURL(blob));
+      let res = await fetch("/api/clipdrop/extend", { method: "POST", body: fd });
+      if (!res.ok) {
+        const txt = await res.text().catch(()=>"");
+        if (forceExact && /Unrecognized key\(s\)/i.test(txt)) {
+          // Build outpaint mask for new borders
+          const imgUrl = URL.createObjectURL(file);
+          const baseImg = new Image();
+          await new Promise((resolve, reject) => { baseImg.onload = resolve; baseImg.onerror = reject; baseImg.src = imgUrl; });
+          const canvas = document.createElement("canvas"); canvas.width = tw; canvas.height = th;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "white"; ctx.fillRect(0,0,tw,th);
+          const x = Math.floor((tw - baseImg.naturalWidth)/2);
+          const y = Math.floor((th - baseImg.naturalHeight)/2);
+          ctx.fillStyle = "black"; ctx.fillRect(x,y,baseImg.naturalWidth, baseImg.naturalHeight);
+          const maskBlob = await new Promise(res2 => canvas.toBlob(res2, "image/png"));
+
+          const fd2 = new FormData();
+          fd2.append("image_file", file);
+          if (prompt.trim()) fd2.append("prompt", prompt.trim());
+          fd2.append("mask_file", maskBlob, "mask.png");
+          fd2.append("target_width", String(tw));
+          fd2.append("target_height", String(th));
+          const res2 = await fetch("/api/openai/outpaint", { method: "POST", body: fd2 });
+          if (!res2.ok) throw new Error(await res2.text());
+          const blob2 = await res2.blob();
+          setResult(URL.createObjectURL(blob2));
+          return;
+        }
+        throw new Error(txt || "Extend failed");
+      } else {
+        const blob = await res.blob();
+        setResult(URL.createObjectURL(blob));
+      }
     } catch (e) {
       setErr(e.message || "Something went wrong.");
     } finally {
@@ -108,6 +138,10 @@ export default function ExtendPage() {
               <label className="mt-4 block">
                 <span className="text-sm font-medium">Fill prompt (optional)</span>
                 <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="describe what should appear in the new areas" value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+              </label>
+              <label className="mt-3 inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={forceExact} onChange={(e)=>setForceExact(e.target.checked)} />
+                <span>Force exact size using AI fill (fallback if needed)</span>
               </label>
               <div className="mt-4 flex items-center gap-3">
                 <button onClick={run} disabled={!file || loading} className="rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] disabled:opacity-50">{loading ? "Processing..." : "Extend"}</button>
