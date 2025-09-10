@@ -1,7 +1,6 @@
-
 # Synir Starter (Next.js + Tailwind)
 
-A minimal, production-ready landing page you can deploy to Vercel today. Add API features later (remove.bg, Stability, Replicate).
+A minimal, production‑ready landing + image tools you can deploy to Vercel today. Includes API routes that proxy to Clipdrop for background removal, replacement, outpainting (extend), upscaling, and text‑to‑image.
 
 ## Quickstart
 
@@ -14,10 +13,38 @@ npm run dev
 
 # 3) Deploy (Vercel)
 # - Push to GitHub
-# - In Vercel: New Project → Import your repo → Deploy
+# - In Vercel: New Project -> Import your repo -> Deploy
 ```
 
-## Where to add features next
-- Create routes under `app/api/*` for proxying calls to remove.bg, Stability, etc.
-- Add an upload component under `app/components/` and wire to your API routes.
-- Store processed images in Cloudinary or Firebase Storage.
+## Environment Variables
+
+Create `.env.local` in the project root (not committed). See `.env.local.example`.
+
+- `CLIPDROP_API_KEY`: required for `/api/clipdrop/*` routes
+- Optional providers (not required by default UI):
+  - `REMOVE_BG_API_KEY`
+  - `OPENAI_API_KEY`
+  - `SLAZZER_API_KEY`
+  - `CUTOUTPRO_API_KEY`
+  - `REPLICATE_API_TOKEN`
+
+## Available Scripts
+
+- `npm run dev`: run Next.js locally at http://localhost:3000
+- `npm run build`: production build
+- `npm start`: start production server
+
+## Project Structure
+
+- `app/` — Next.js App Router pages
+  - `page.jsx` — landing page
+  - `tools/*` — UI for image tools
+  - `api/clipdrop/*` — proxy routes to Clipdrop
+- `components/` — shared UI components
+- `styles/` — Tailwind CSS
+
+## Notes
+
+- The Extend tool uses Clipdrop Uncrop and intentionally sends a minimal payload for broad key compatibility.
+- You can deploy to Vercel and add `CLIPDROP_API_KEY` in the Vercel Project -> Settings -> Environment Variables.
+

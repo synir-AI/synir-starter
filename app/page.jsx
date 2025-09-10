@@ -14,10 +14,10 @@ export default function HomePage() {
   ];
 
   const why = [
-    { title: "Pro‑grade quality", body: "Clean edges, realistic textures, and color‑true outputs—great for ecommerce and social." },
-    { title: "Fast & affordable", body: "API‑first stack for speed today, room for our own models later." },
-    { title: "Private by default", body: "Images are processed server‑side. Keys stay on the backend." },
-    { title: "Simple workflow", body: "Upload → choose a tool → download. Minimal clicks, maximal results." },
+    { title: "Pro-grade quality", body: "Clean edges, realistic textures, and color-true outputs — great for ecommerce and social." },
+    { title: "Fast & affordable", body: "API-first stack for speed today, room for our own models later." },
+    { title: "Private by default", body: "Images are processed server-side. Keys stay on the backend." },
+    { title: "Simple workflow", body: "Upload -> choose a tool -> download. Minimal clicks, maximal results." },
   ];
 
   return (
@@ -34,7 +34,7 @@ export default function HomePage() {
               <a href="/signup" className="inline-flex items-center rounded-xl bg-[#4ECDC4] px-4 py-2 font-medium text-[#2F3E46] shadow-sm hover:opacity-90">Sign Up</a>
             </nav>
             <button
-              onClick={() => setMobileOpen(v=>!v)}
+              onClick={() => setMobileOpen(v => !v)}
               className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-[#EDEDED]"
               aria-label="Toggle navigation"
             >
@@ -66,7 +66,7 @@ export default function HomePage() {
               Create, edit, and enhance images in seconds.
             </h1>
             <p className="mt-4 text-lg text-[#2F3E46]/80">
-              Background removal, replacement, upscaling, outpainting, and text‑to‑image in one clean, trustworthy workspace.
+              Background removal, replacement, upscaling, outpainting, and text-to-image in one clean, trustworthy workspace.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a href="/signup" className="inline-flex items-center rounded-xl bg-[#4ECDC4] px-5 py-3 font-semibold text-[#2F3E46] shadow hover:opacity-90">Start creating for free</a>
@@ -89,46 +89,47 @@ export default function HomePage() {
       <section className="bg-white border-y border-[#E0E0E0]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="flex items-end justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-semibold">All tools</h2>
-            <a href="/tools" className="text-sm font-medium hover:text-[#4ECDC4]">View all →</a>
+            <h2 className="text-2xl sm:text-3xl font-semibold">Popular tools</h2>
+            <a href="/tools" className="text-sm underline underline-offset-4">View all</a>
           </div>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-            {tools.map((t) => (
-              <a key={t.name} href={t.href} className="group relative rounded-2xl border border-[#E6E6E6] bg-white p-4 shadow-sm hover:shadow-md transition">
-                {t.badge && <span className="absolute right-3 top-3 rounded-full bg-[#4ECDC4]/20 px-2 py-1 text-xs font-semibold text-[#2F3E46]">{t.badge}</span>}
-                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-[#EDEDED] flex items-center justify-center"><ToolIcon /></div>
-                <h3 className="mt-4 font-semibold">{t.name}</h3>
-                <p className="mt-1 text-sm text-[#2F3E46]/75">{t.desc}</p>
-                <span className="mt-3 inline-flex items-center text-sm font-medium text-[#2F3E46] group-hover:text-[#4ECDC4]">
-                  Open tool
-                  <svg className="ml-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H9M17 7v8" />
-                  </svg>
-                </span>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {tools.map(t => (
+              <a key={t.href} href={t.href} className="rounded-2xl bg-white border border-[#E6E6E6] p-5 shadow-sm hover:shadow transition">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{t.name}</h3>
+                  {t.badge && <span className="text-xs rounded-full bg-[#4ECDC4]/20 text-[#2F3E46] px-2 py-1">{t.badge}</span>}
+                </div>
+                <p className="mt-2 text-sm text-[#2F3E46]/80">{t.desc}</p>
               </a>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="bg-[#EDEDED]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-          <h2 className="text-2xl sm:text-3xl font-semibold">Why choose Synir AI</h2>
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {/* Why */}
+      <section>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {why.map((w) => (
-              <div key={w.title} className="rounded-2xl bg-white p-6 border border-[#E6E6E6] shadow-sm">
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#4ECDC4]/25"><CheckIcon /></div>
-                <h3 className="mt-4 font-semibold">{w.title}</h3>
-                <p className="mt-2 text-sm text-[#2F3E46]/75">{w.body}</p>
+              <div key={w.title} className="rounded-xl border border-[#E6E6E6] bg-white p-5">
+                <div className="flex items-center gap-3">
+                  <CheckIcon />
+                  <h3 className="font-semibold">{w.title}</h3>
+                </div>
+                <p className="mt-2 text-[#2F3E46]/80">{w.body}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-[#2F3E46]/80">
-            <div className="rounded-xl border border-[#E6E6E6] bg-white p-5">“The background tools saved our product shoot.” — <b>Elena • Shop Owner</b></div>
-            <div className="rounded-xl border border-[#E6E6E6] bg-white p-5">“Best upscale quality for the price.” — <b>Marcus • Designer</b></div>
-            <div className="rounded-xl border border-[#E6E6E6] bg-white p-5">“Clean UI. Our team adopted it instantly.” — <b>Ray • Marketer</b></div>
+      {/* Testimonials */}
+      <section className="bg-white border-y border-[#E0E0E0]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-[#2F3E46]/80">
+            <div className="rounded-xl border border-[#E6E6E6] bg-white p-5">"The background tools saved our product shoot." — <b>Elena, Shop Owner</b></div>
+            <div className="rounded-xl border border-[#E6E6E6] bg-white p-5">"Best upscale quality for the price." — <b>Marcus, Designer</b></div>
+            <div className="rounded-xl border border-[#E6E6E6] bg-white p-5">"Clean UI. Our team adopted it instantly." — <b>Ray, Marketer</b></div>
           </div>
         </div>
       </section>
@@ -137,7 +138,7 @@ export default function HomePage() {
       <section className="bg-[#F5F5F4]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h2 className="text-3xl sm:text-4xl font-semibold">Start creating in seconds — free.</h2>
-          <p className="mt-3 text-lg text-[#2F3E46]/80">No credit card needed. Upgrade anytime for higher resolution and watermark‑free exports.</p>
+          <p className="mt-3 text-lg text-[#2F3E46]/80">No credit card needed. Upgrade anytime for higher resolution and watermark-free exports.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <a href="/signup" className="inline-flex items-center rounded-xl bg-[#4ECDC4] px-6 py-3 font-semibold text-[#2F3E46] shadow hover:opacity-90">Start creating for free</a>
             <a href="/pricing" className="inline-flex items-center rounded-xl border border-[#2F3E46] px-6 py-3 font-semibold text-[#2F3E46] hover:bg-[#EDEDED]">See pricing</a>
@@ -198,16 +199,29 @@ export default function HomePage() {
 }
 
 function StarIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.3l6.18 3.7-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>);
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 17.3l6.18 3.7-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+    </svg>
+  );
 }
+
 function CheckIcon() {
-  return (<svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>);
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
 }
+
 function ToolIcon() {
-  return (<svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <rect x="3" y="3" width="7" height="7" strokeWidth="2" rx="1" />
-    <rect x="14" y="3" width="7" height="7" strokeWidth="2" rx="1" />
-    <rect x="3" y="14" width="7" height="7" strokeWidth="2" rx="1" />
-    <rect x="14" y="14" width="7" height="7" strokeWidth="2" rx="1" />
-  </svg>);
+  return (
+    <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <rect x="3" y="3" width="7" height="7" strokeWidth="2" rx="1" />
+      <rect x="14" y="3" width="7" height="7" strokeWidth="2" rx="1" />
+      <rect x="3" y="14" width="7" height="7" strokeWidth="2" rx="1" />
+      <rect x="14" y="14" width="7" height="7" strokeWidth="2" rx="1" />
+    </svg>
+  );
 }
+

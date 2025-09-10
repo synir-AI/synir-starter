@@ -2,7 +2,7 @@ import "../styles/globals.css";
 
 export const metadata = {
   title: "Synir AI — Intelligence at the Core",
-  description: "AI-powered creative and workflow tools by Synir AI."
+  description: "AI-powered creative and workflow tools by Synir AI.",
 };
 
 export default function RootLayout({ children }) {
@@ -12,3 +12,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+

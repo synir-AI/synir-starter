@@ -13,103 +13,82 @@ export default function ExtendPage() {
   const [err, setErr] = useState("");
 
   const pick = () => inputRef.current?.click();
-  const onChange = (e) => { const f=e.target.files?.[0]; if(!f) return; setFile(f); setPreview(URL.createObjectURL(f)); setResult(""); setErr(""); };
+  const onChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+    setResult("");
+    setErr("");
+  };
 
   const run = async () => {
-  if (!file) return setErr("Choose an image first.");
-  setLoading(true); setErr(""); setResult("");
-
-  try {
-    // 1) Read the original image dimensions
-    const imgUrl = URL.createObjectURL(file);
-    const imgEl = new Image();
-    await new Promise((resolve, reject) => {
-      imgEl.onload = resolve;
-      imgEl.onerror = reject;
-      imgEl.src = imgUrl;
-    });
-
-    const origW = imgEl.naturalWidth;
-    const origH = imgEl.naturalHeight;
-
-    // Choose target size (you can wire inputs later; here we keep it simple)
-    const targetW = Math.max(origW, 2048);
-    const targetH = Math.max(origH, 2048);
-
-    // 2) Build a mask: white border to fill, black region where the original sits
-    const maskCanvas = document.createElement("canvas");
-    maskCanvas.width = targetW;
-    maskCanvas.height = targetH;
-    const mctx = maskCanvas.getContext("2d");
-
-    // All white = fill area
-    mctx.fillStyle = "white";
-    mctx.fillRect(0, 0, targetW, targetH);
-
-    // Compute centered placement for original image (no scaling for true "extend")
-    const x = Math.floor((targetW - origW) / 2);
-    const y = Math.floor((targetH - origH) / 2);
-
-    // Draw a black rectangle where the original image will sit (keep area)
-    mctx.fillStyle = "black";
-    mctx.fillRect(x, y, origW, origH);
-
-    // Export the mask as PNG blob
-    const maskBlob = await new Promise((res) => maskCanvas.toBlob(res, "image/png"));
-
-    // 3) Send both the original image and the mask to our API with an optional prompt
-    const fd = new FormData();
-fd.append("image_file", file);
-
-const res = await fetch("/api/clipdrop/extend", { method: "POST", body: fd })
-
-
-    if (!res.ok) throw new Error(await res.text());
-    const blob = await res.blob();
-    setResult(URL.createObjectURL(blob));
-  } catch (e) {
-    setErr(e.message || "Something went wrong.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+    if (!file) return setErr("Choose an image first.");
+    setLoading(true);
+    setErr("");
+    setResult("");
+    try {
+      // Note: Many Clipdrop Uncrop keys only accept image_file; keep payload minimal
+      const fd = new FormData();
+      fd.append("image_file", file);
+      const res = await fetch("/api/clipdrop/extend", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      setResult(URL.createObjectURL(blob));
+    } catch (e) {
+      setErr(e.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#F5F5F4] text-[#2F3E46]">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
-        <header className="mb-6"><h1 className="text-3xl font-semibold">Extend Your Image</h1><p className="mt-2 text-[#2F3E46]/80">Outpaint to a wider canvas while keeping style and lighting.</p></header>
+        <header className="mb-6">
+          <h1 className="text-3xl font-semibold">Extend Your Image</h1>
+          <p className="mt-2 text-[#2F3E46]/80">Outpaint to a wider canvas while keeping style and lighting.</p>
+        </header>
         <section className="rounded-2xl bg-white p-6 shadow-sm border border-[#E6E6E6]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <div className="aspect-video rounded-xl bg-[#EDEDED] flex items-center justify-center overflow-hidden">
-                {preview ? <img className="object-contain max-h-full" src={preview} alt="Preview" /> : <button onClick={pick} className="px-4 py-2 rounded-xl border border-[#2F3E46] hover:bg-[#EDEDED]">Choose Image</button>}
+                {preview ? (
+                  <img className="object-contain max-h-full" src={preview} alt="Preview" />
+                ) : (
+                  <button onClick={pick} className="px-4 py-2 rounded-xl border border-[#2F3E46] hover:bg-[#EDEDED]">Choose Image</button>
+                )}
                 <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onChange} />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <label className="block"><span className="text-sm font-medium">Target width (px)</span>
-                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={w} onChange={(e)=>setW(e.target.value)} />
+                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={w} onChange={(e) => setW(e.target.value)} />
                 </label>
                 <label className="block"><span className="text-sm font-medium">Target height (px)</span>
-                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={h} onChange={(e)=>setH(e.target.value)} />
+                  <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-2 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="e.g., 2048" value={h} onChange={(e) => setH(e.target.value)} />
                 </label>
               </div>
               <label className="mt-4 block">
                 <span className="text-sm font-medium">Fill prompt (optional)</span>
-                <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="describe what should appear in the new areas" value={prompt} onChange={(e)=>setPrompt(e.target.value)} />
+                <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" placeholder="describe what should appear in the new areas" value={prompt} onChange={(e) => setPrompt(e.target.value)} />
               </label>
               <div className="mt-4 flex items-center gap-3">
-                <button onClick={run} disabled={!file || loading} className="rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] disabled:opacity-50">{loading ? "Processing…" : "Extend"}</button>
+                <button onClick={run} disabled={!file || loading} className="rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] disabled:opacity-50">{loading ? "Processing..." : "Extend"}</button>
                 <a href="/tools" className="rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Back to tools</a>
               </div>
               {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
             </div>
             <div>
               <div className="aspect-video rounded-xl bg-[#EDEDED] flex items-center justify-center overflow-hidden">
-                {result ? <img className="object-contain max-h-full" src={result} alt="Result" /> : <span className="text-[#2F3E46]/60 text-sm">Result will appear here</span>}
+                {result ? (
+                  <img className="object-contain max-h-full" src={result} alt="Result" />
+                ) : (
+                  <span className="text-[#2F3E46]/60 text-sm">Result will appear here</span>
+                )}
               </div>
-              {result && <a href={result} download="extended.png" className="mt-4 inline-block rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Download</a>}
+              {result && (
+                <a href={result} download="extended.png" className="mt-4 inline-block rounded-xl border border-[#2F3E46] px-4 py-2 font-semibold hover:bg-[#EDEDED]">Download</a>
+              )}
             </div>
           </div>
         </section>
@@ -117,3 +96,4 @@ const res = await fetch("/api/clipdrop/extend", { method: "POST", body: fd })
     </main>
   );
 }
+

@@ -1,9 +1,18 @@
-# dependencies
+# Node / Next.js
 node_modules/
-
-# next.js
 .next/
 out/
 
-# env
+# Env files
 .env*
+!.env.local.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Tooling
+.DS_Store
+.vercel/
+
