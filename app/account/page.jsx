@@ -3,30 +3,21 @@ import { useEffect, useState } from "react";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState(null);
+  const [me, setMe] = useState(null);
   const [customer, setCustomer] = useState("");
   const [err, setErr] = useState("");
 
   // If redirected from Stripe Checkout success
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const sid = url.searchParams.get("session_id");
-    if (!sid) { setLoading(false); return; }
     (async () => {
       try {
-        const r = await fetch(`/api/stripe/session?id=${encodeURIComponent(sid)}`);
-        if (!r.ok) throw new Error(await r.text());
-        const data = await r.json();
-        setSession(data);
-        const cust = data.customer || data.customer_details?.email || "";
-        if (typeof cust === "string") setCustomer(cust);
-        // Mark user as pro for this browser (temporary until auth is added)
-        document.cookie = `pro=1; Path=/; SameSite=Lax; Max-Age=${60*60*24*30}`;
-      } catch (e) {
-        setErr(e.message || "Failed to load session");
-      } finally {
-        setLoading(false);
-      }
+        // Refresh user/subscription view
+        const meR = await fetch("/api/me", { cache: "no-store" });
+        const mj = await meR.json();
+        setMe(mj.user);
+        setCustomer(mj.user?.stripeCustomerId || "");
+      } catch (e) { setErr(e.message || "Failed to load account"); }
+      finally { setLoading(false); }
     })();
   }, []);
 
@@ -49,6 +40,10 @@ export default function AccountPage() {
         ) : (
           <div className="mt-6 rounded-2xl bg-white border border-[#E6E6E6] p-6 shadow-sm space-y-4">
             <div>
+              <div className="text-sm text-[#2F3E46]/60">Plan</div>
+              <div>{me?.subscription?.status ? `${me.subscription.plan} (${me.subscription.status})` : "Free"}</div>
+            </div>
+            <div>
               <div className="text-sm text-[#2F3E46]/60">Stripe customer</div>
               <div className="font-mono break-all">{customer || "–"}</div>
             </div>
@@ -63,4 +58,3 @@ export default function AccountPage() {
     </main>
   );
 }
-

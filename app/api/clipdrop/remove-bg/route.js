@@ -4,8 +4,20 @@ export async function POST(req) {
   try {
     // Basic quota limiting (free vs. pro via cookie)
     const cookies = req.headers.get("cookie") || "";
-    const isPro = /(?:^|; )pro=1(?:;|$)/.test(cookies);
-    const uid = (cookies.match(/(?:^|; )uid=([^;]+)/)?.[1]) || "anon";
+    let isPro = /(?:^|; )pro=1(?:;|$)/.test(cookies);
+    let uid = (cookies.match(/(?:^|; )uid=([^;]+)/)?.[1]) || "anon";
+    // Check auth-based subscription
+    try {
+      const { getServerSession } = await import("next-auth");
+      const { authOptions } = await import("../../../lib/authOptions.js");
+      const { prisma } = await import("../../../lib/prisma.js");
+      const session = await getServerSession(authOptions);
+      if (session?.user?.id) {
+        uid = session.user.id;
+        const sub = await prisma.subscription.findUnique({ where: { userId: uid } });
+        isPro = Boolean(sub && (sub.status === "active" || sub.status === "trialing"));
+      }
+    } catch {}
     const { limit, quotaKey } = await import("../../../lib/ratelimit.js");
     const key = (await quotaKey({ tool: "remove-bg", uid })).toString();
     const max = isPro ? 200 : 10;

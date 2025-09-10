@@ -34,6 +34,13 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
   - `CUTOUTPRO_API_KEY`
   - `REPLICATE_API_TOKEN`
 
+### Auth (Auth.js / NextAuth + Prisma)
+
+- `NEXTAUTH_SECRET` (generate via `openssl rand -base64 32`)
+- `NEXTAUTH_URL` (e.g., http://localhost:3000 for local)
+- `GITHUB_ID`, `GITHUB_SECRET` (OAuth app for GitHub sign-in)
+- `DATABASE_URL` (SQLite default: `file:./dev.db`)
+
 ## Available Scripts
 
 - `npm run dev`: run Next.js locally at http://localhost:3000
@@ -76,6 +83,17 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
 - Honeypot + origin checks: contact API requires `X-Requested-With` and enforces origin/host match or `ALLOWED_ORIGIN`.
 - Security headers: set in `next.config.mjs` (CSP, X-Frame-Options, etc.). Adjust CSP if you add external scripts.
 - Health check: `/api/health` returns `{ ok: true }` for monitoring.
+
+## Setup (One-time)
+
+1) Install new deps:
+   - `npm i next-auth @prisma/client stripe`
+   - `npm i -D prisma`
+2) Initialize database:
+   - `npx prisma migrate dev --name init` (creates SQLite `dev.db` by default)
+3) Create a GitHub OAuth app (or use another provider) and set `GITHUB_ID`/`GITHUB_SECRET`.
+4) Set Stripe prices (`STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`) and secret. Add webhook to `/api/stripe/webhook` with `STRIPE_WEBHOOK_SECRET`.
+5) (Optional) Upstash and Turnstile: add keys if you want quotas and captcha.
 ### Subscriptions (Stripe)
 
 - Set: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `NEXT_PUBLIC_SITE_URL`.

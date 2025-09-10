@@ -1,12 +1,18 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../lib/authOptions";
+import { prisma } from "../../../lib/prisma";
+
 export const runtime = "nodejs";
 
-export async function POST(req) {
+export async function POST() {
   try {
     const secret = process.env.STRIPE_SECRET_KEY;
     if (!secret) return new Response("Stripe not configured", { status: 500 });
-    const body = await req.json().catch(() => ({}));
-    const { customer } = body; // expect client to send Stripe customer id (from /account page)
-    if (!customer) return new Response("Missing customer", { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return new Response("Unauthorized", { status: 401 });
+    const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { stripeCustomerId: true } });
+    const customer = user?.stripeCustomerId;
+    if (!customer) return new Response("No Stripe customer", { status: 400 });
 
     const params = new URLSearchParams();
     params.append("customer", customer);
@@ -24,4 +30,3 @@ export async function POST(req) {
     return new Response(`Server error: ${e.message}`, { status: 500 });
   }
 }
-
