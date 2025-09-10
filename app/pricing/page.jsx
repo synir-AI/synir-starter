@@ -1,3 +1,5 @@
+"use client";
+
 export default function PricingPage() {
   return (
     <main className="min-h-screen bg-[#F5F5F4] text-[#2F3E46]">

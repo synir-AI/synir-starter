@@ -8,8 +8,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {/* Auth session provider for client components using useSession */}
+        {/**/}
+        {/* eslint-disable-next-line @next/next/no-head-element */}
+        {/* Wrap in a client Providers component */}
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }
 
+import AppProviders from "./providers";
