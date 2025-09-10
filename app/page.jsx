@@ -6,11 +6,14 @@ export default function HomePage() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const tools = [
-    { name: "Generate AI Image", href: "/tools/generate", desc: "Create images from text prompts.", badge: "Beta" },
-    { name: "Remove Background", href: "/tools/remove-bg", desc: "Instantly isolate your subject with clean edges." },
-    { name: "Replace Background", href: "/tools/replace-bg", desc: "Swap scenes while keeping realism." },
-    { name: "Extend Your Image", href: "/tools/extend", desc: "Outpaint to a wider canvas." },
-    { name: "Upscale Your Image", href: "/tools/upscale", desc: "Boost resolution & detail." },
+    { name: "Generate", href: "/tools/generate", desc: "Text to image", badge: "Beta" },
+    { name: "Remove BG", href: "/tools/remove-bg", desc: "Cutout subject" },
+    { name: "Replace BG", href: "/tools/replace-bg", desc: "Swap backgrounds" },
+    { name: "Extend", href: "/tools/extend", desc: "Outpaint canvas" },
+    { name: "Upscale", href: "/tools/upscale", desc: "Enhance detail" },
+    { name: "Cleanup", href: "/tools/cleanup", desc: "Remove objects" },
+    { name: "Remove Text", href: "/tools/remove-text", desc: "Erase text" },
+    { name: "Resizer", href: "/tools/resizer", desc: "Exact sizes" },
   ];
 
   const why = [
@@ -59,47 +62,38 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section>
+      <section className="bg-gradient-to-b from-white to-[#F5F5F4]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl font-semibold leading-tight">
-              Create, edit, and enhance images in seconds.
+            <h1 className="text-4xl sm:text-5xl font-semibold leading-tight tracking-tight">
+              Bright, clean image tools for everyone.
             </h1>
             <p className="mt-4 text-lg text-[#2F3E46]/80">
-              Background removal, replacement, upscaling, outpainting, and text-to-image in one clean, trustworthy workspace.
+              Generate, resize, remove/replace backgrounds, cleanup objects, outpaint and upscale — all in one simple workspace.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href="/signup" className="inline-flex items-center rounded-xl bg-[#4ECDC4] px-5 py-3 font-semibold text-[#2F3E46] shadow hover:opacity-90">Start creating for free</a>
-              <a href="/tools" className="inline-flex items-center rounded-xl border border-[#2F3E46] px-5 py-3 font-semibold text-[#2F3E46] hover:bg-[#EDEDED]">Explore tools</a>
-            </div>
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-[#2F3E46]/70">
-              <span className="inline-flex items-center gap-2">
-                <StarIcon /> 4.9/5 avg. rating
-              </span>
-              <span className="h-4 w-px bg-[#E0E0E0]" />
-              <span>Trusted by creators and shops worldwide</span>
-              <span className="h-4 w-px bg-[#E0E0E0]" />
-              <span>No design skills required</span>
+              <a href="/tools" className="inline-flex items-center rounded-xl bg-[#4ECDC4] px-5 py-3 font-semibold text-[#2F3E46] shadow hover:opacity-90">Start using the tools</a>
+              <a href="#tools" className="inline-flex items-center rounded-xl border border-[#2F3E46] px-5 py-3 font-semibold text-[#2F3E46] hover:bg-[#EDEDED]">See all tools</a>
             </div>
           </div>
         </div>
       </section>
 
       {/* Tools Grid */}
-      <section className="bg-white border-y border-[#E0E0E0]">
+      <section id="tools" className="bg-white border-y border-[#E0E0E0]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="text-2xl sm:text-3xl font-semibold">Popular tools</h2>
-            <a href="/tools" className="text-sm underline underline-offset-4">View all</a>
-          </div>
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <h2 className="text-2xl sm:text-3xl font-semibold">Tools</h2>
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
             {tools.map(t => (
-              <a key={t.href} href={t.href} className="rounded-2xl bg-white border border-[#E6E6E6] p-5 shadow-sm hover:shadow transition">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">{t.name}</h3>
-                  {t.badge && <span className="text-xs rounded-full bg-[#4ECDC4]/20 text-[#2F3E46] px-2 py-1">{t.badge}</span>}
+              <a key={t.href} href={t.href} className="group rounded-2xl bg-white border border-[#E6E6E6] p-5 shadow-sm hover:shadow transition">
+                <div className="aspect-square rounded-xl bg-[#F7F7F7] border border-[#EDEDED] flex items-center justify-center text-[#2F3E46]/60 group-hover:bg-[#F2FFFC]">
+                  <ToolIcon />
                 </div>
-                <p className="mt-2 text-sm text-[#2F3E46]/80">{t.desc}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <h3 className="text-base font-semibold">{t.name}</h3>
+                  {t.badge && <span className="text-[10px] rounded-full bg-[#4ECDC4]/20 text-[#2F3E46] px-2 py-0.5">{t.badge}</span>}
+                </div>
+                <p className="mt-1 text-xs text-[#2F3E46]/70">{t.desc}</p>
               </a>
             ))}
           </div>
@@ -224,4 +218,3 @@ function ToolIcon() {
     </svg>
   );
 }
-
