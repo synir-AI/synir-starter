@@ -25,6 +25,7 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
   - `RESEND_API_KEY`: to send contact form emails via Resend
   - `CONTACT_TO`: recipient email address (e.g., you@domain.com)
   - `CONTACT_FROM`: sender address (e.g., noreply@yourdomain.com)
+  - `ALLOWED_ORIGIN`: optional strict origin (e.g., https://yourdomain.com)
 - Optional providers (not required by default UI):
   - `REMOVE_BG_API_KEY`
   - `OPENAI_API_KEY`
@@ -60,9 +61,17 @@ Create `.env.local` in the project root (not committed). See `.env.local.example
 2) In Vercel, set Environment Variables (Project -> Settings -> Environment Variables):
    - `CLIPDROP_API_KEY` = your key (Required)
    - Optional keys (only if you wire up those providers): `REMOVE_BG_API_KEY`, `OPENAI_API_KEY`, `SLAZZER_API_KEY`, `CUTOUTPRO_API_KEY`, `REPLICATE_API_TOKEN`.
+   - Contact form optional: `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`, `ALLOWED_ORIGIN`.
 3) Deploy.
 
 ### Local .env
 
 - Copy `.env.local.example` to `.env.local` and fill values.
 - Restart `npm run dev` after changes.
+
+## Hardening & Ops
+
+- Rate limiting: basic in-memory limiter on `/api/contact` to reduce spam (use a store like Redis for production persistence).
+- Honeypot + origin checks: contact API requires `X-Requested-With` and enforces origin/host match or `ALLOWED_ORIGIN`.
+- Security headers: set in `next.config.mjs` (CSP, X-Frame-Options, etc.). Adjust CSP if you add external scripts.
+- Health check: `/api/health` returns `{ ok: true }` for monitoring.

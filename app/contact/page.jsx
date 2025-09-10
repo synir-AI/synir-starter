@@ -1,10 +1,13 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ContactPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState("");
   const [err, setErr] = useState("");
@@ -17,12 +20,17 @@ export default function ContactPage() {
     try {
       const r = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({ name, email, message, website }),
       });
       if (!r.ok) throw new Error(await r.text());
       setOk("Thanks! We received your message.");
-      setName(""); setEmail(""); setMessage("");
+      setName(""); setEmail(""); setMessage(""); setWebsite("");
+      // Redirect to thank-you page
+      router.push("/contact/thanks");
     } catch (e) {
       setErr(e.message || "Failed to send. Please try again later.");
     } finally {
@@ -36,6 +44,11 @@ export default function ContactPage() {
         <h1 className="text-3xl font-semibold">Contact</h1>
         <p className="mt-3 text-[#2F3E46]/80">Send us a message and we’ll get back to you.</p>
         <form onSubmit={submit} className="mt-6 rounded-2xl bg-white border border-[#E6E6E6] p-6 shadow-sm space-y-4">
+          {/* Honeypot field: keep invisible to humans */}
+          <label className="block sr-only" aria-hidden>
+            <span>Website</span>
+            <input tabIndex={-1} autoComplete="off" value={website} onChange={(e)=>setWebsite(e.target.value)} />
+          </label>
           <label className="block">
             <span className="text-sm font-medium">Name</span>
             <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" value={name} onChange={(e)=>setName(e.target.value)} />
