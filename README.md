@@ -21,6 +21,10 @@ npm run dev
 Create `.env.local` in the project root (not committed). See `.env.local.example`.
 
 - `CLIPDROP_API_KEY`: required for `/api/clipdrop/*` routes
+- Contact form (optional):
+  - `RESEND_API_KEY`: to send contact form emails via Resend
+  - `CONTACT_TO`: recipient email address (e.g., you@domain.com)
+  - `CONTACT_FROM`: sender address (e.g., noreply@yourdomain.com)
 - Optional providers (not required by default UI):
   - `REMOVE_BG_API_KEY`
   - `OPENAI_API_KEY`

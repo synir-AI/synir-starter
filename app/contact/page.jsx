@@ -1,11 +1,62 @@
+"use client";
+import { useState } from "react";
+
 export default function ContactPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [ok, setOk] = useState("");
+  const [err, setErr] = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setOk(""); setErr("");
+    if (!name.trim() || !email.trim() || !message.trim()) { setErr("Please fill all fields."); return; }
+    setLoading(true);
+    try {
+      const r = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      setOk("Thanks! We received your message.");
+      setName(""); setEmail(""); setMessage("");
+    } catch (e) {
+      setErr(e.message || "Failed to send. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#F5F5F4] text-[#2F3E46]">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-semibold">Contact</h1>
-        <p className="mt-3 text-[#2F3E46]/80">Reach us at contact@synir.ai (placeholder).</p>
+        <p className="mt-3 text-[#2F3E46]/80">Send us a message and we’ll get back to you.</p>
+        <form onSubmit={submit} className="mt-6 rounded-2xl bg-white border border-[#E6E6E6] p-6 shadow-sm space-y-4">
+          <label className="block">
+            <span className="text-sm font-medium">Name</span>
+            <input className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" value={name} onChange={(e)=>setName(e.target.value)} />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium">Email</span>
+            <input type="email" className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" value={email} onChange={(e)=>setEmail(e.target.value)} />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium">Message</span>
+            <textarea rows={5} className="mt-2 w-full rounded-xl border border-[#CFCFCF] bg-white p-3 outline-none focus:ring-2 focus:ring-[#4ECDC4]" value={message} onChange={(e)=>setMessage(e.target.value)} />
+          </label>
+          <div className="flex items-center gap-3">
+            <button disabled={loading} className="rounded-xl bg-[#4ECDC4] px-4 py-2 font-semibold text-[#2F3E46] disabled:opacity-50">
+              {loading ? "Sending..." : "Send message"}
+            </button>
+            {ok && <span className="text-sm text-green-700">{ok}</span>}
+            {err && <span className="text-sm text-red-600">{err}</span>}
+          </div>
+        </form>
       </div>
     </main>
   );
 }
-
