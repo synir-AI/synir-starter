@@ -9,18 +9,20 @@ export async function POST(req) {
     const fd = await req.formData();
     const image = fd.get("image_file");
     const mask = fd.get("mask_file");
-    const prompt = fd.get("prompt") || "";
+    const promptRaw = fd.get("prompt") || "";
     const targetW = fd.get("target_width");
     const targetH = fd.get("target_height");
     if (!image || !mask || !targetW || !targetH) return new Response("image_file, mask_file, target_width, target_height required", { status: 400 });
 
     const size = `${targetW}x${targetH}`;
+    const prompt = String(promptRaw).trim() ||
+      "Fill the extended canvas areas realistically, matching the original image's background, lighting, perspective, textures, and style.";
     const upstream = new FormData();
     upstream.append("model", "gpt-image-1");
     upstream.append("image", image, "image.png");
     upstream.append("mask", mask, "mask.png");
     upstream.append("size", size);
-    if (prompt) upstream.append("prompt", prompt);
+    upstream.append("prompt", prompt);
 
     const r = await fetch("https://api.openai.com/v1/images/edits", {
       method: "POST",
@@ -37,4 +39,3 @@ export async function POST(req) {
     return new Response(`Server error: ${e.message}`, { status: 500 });
   }
 }
-
