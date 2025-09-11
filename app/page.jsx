@@ -13,7 +13,6 @@ export default function HomePage() {
     { name: "Upscale", href: "/tools/upscale", desc: "Enhance detail" },
     { name: "Cleanup", href: "/tools/cleanup", desc: "Remove objects" },
     { name: "Remove Text", href: "/tools/remove-text", desc: "Erase text" },
-    { name: "Resizer", href: "/tools/resizer", desc: "Exact sizes" },
   ];
 
   const why = [

@@ -14,7 +14,21 @@ export async function POST(req) {
     const targetH = fd.get("target_height");
     if (!image || !mask || !targetW || !targetH) return new Response("image_file, mask_file, target_width, target_height required", { status: 400 });
 
-    const size = `${targetW}x${targetH}`;
+    // Map to OpenAI-supported sizes (1024x1024, 1536x1024, 1024x1536) closest to requested aspect
+    const tw = Number(targetW), th = Number(targetH);
+    const tRatio = tw / th;
+    const candidates = [
+      { s: "1024x1024", r: 1.0 },
+      { s: "1536x1024", r: 1536 / 1024 },
+      { s: "1024x1536", r: 1024 / 1536 },
+    ];
+    let best = candidates[0];
+    let bestDiff = Math.abs(tRatio - best.r);
+    for (const c of candidates) {
+      const d = Math.abs(tRatio - c.r);
+      if (d < bestDiff) { best = c; bestDiff = d; }
+    }
+    const size = best.s;
     const prompt = String(promptRaw).trim() ||
       "Fill the extended canvas areas realistically, matching the original image's background, lighting, perspective, textures, and style.";
     const upstream = new FormData();
