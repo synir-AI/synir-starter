@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import InfoNote from "../components/InfoNote.jsx";
+import InfoNote from "../../components/InfoNote.jsx";
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
